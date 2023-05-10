@@ -11,22 +11,21 @@
 #include "stdint.h"
 
 typedef enum {
-	broadcast,
-	EM,
-	EV,
-} Telegram_cmd;
-
-typedef enum {
-	Request,
-	Answers,
-} Telegram_direction;
+	Display = 1,
+	Accel,
+	Gyro,
+	Temp,
+	Potenciometer,
+	Requisition = 255,
+} Telegram_id;
 
 typedef struct {
-	Telegram_cmd command,
-	Telegram_direction direction,
+	float temperature;
+} Telegram_data;
 
+typedef struct {
+	Telegram_id id;
+	Telegram_data data;
 } Telegram;
-
-
 
 #endif /* INC_TELEGRAM_H_ */
