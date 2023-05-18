@@ -29,34 +29,21 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include "Telegram.h"
 
 /* USER CODE END Includes */
 
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart4;
 
-extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart5;
 
 /* USER CODE BEGIN Private defines */
 
-#define RXBUFFERSIZE 512
-
-typedef struct {
-	UART_HandleTypeDef *const handler;
-	int txFlag;
-	int rxFlag;
-	uint8_t rxBuffer[RXBUFFERSIZE];
-	Telegram txBuffer;
-} Uart;
-
 /* USER CODE END Private defines */
 
-void MX_USART1_UART_Init(void);
-void MX_USART2_UART_Init(void);
+void MX_UART4_Init(void);
+void MX_UART5_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
-void Uart_tx(Uart * this, float value);
 
 /* USER CODE END Prototypes */
 

@@ -21,6 +21,8 @@ typedef enum {
 
 typedef struct {
 	float temperature;
+	float dontCare1;
+	float dontCare2;
 } Telegram_data;
 
 typedef struct {

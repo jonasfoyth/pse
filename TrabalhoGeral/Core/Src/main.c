@@ -47,9 +47,6 @@
 
 /* USER CODE BEGIN PV */
 
-Uart uartLeft = {.handler = &huart1}; // Uart connected to the last EM
-Uart uartRight = {.handler = &huart2}; // Uart Connected to EV side
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,13 +90,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
+  MX_UART4_Init();
+  MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-
-  // Prepara UART para recepção.
-  HAL_UARTEx_ReceiveToIdle_DMA(uartLeft.handler, uartLeft.rxBuffer, RXBUFFERSIZE);
-  HAL_UARTEx_ReceiveToIdle_DMA(uartRight.handler, uartRight.rxBuffer, RXBUFFERSIZE);
 
   /* USER CODE END 2 */
 
@@ -168,65 +161,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-// Funções chamadas de acordo com alguns eventos da UART
-// Faça o que precisar aqui, mas cuidado, aqui ainda estamos dentro
-// da interrupção da uart, seja breve.
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-	Uart *uart;
-
-	if (huart == uartRight.handler) {
-		uart = &uartRight;
-	} else if (huart == uartLeft.handler) {
-		uart = &uartLeft;
-	} else {
-		return;
-	}
-
-	// Cancela qualquer operação
-	HAL_UART_Abort(uart->handler);
-
-	// Reinicia recepção.
-	HAL_UARTEx_ReceiveToIdle_DMA(uart->handler, uart->rxBuffer, RXBUFFERSIZE);
-
-	return;
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	Uart *uart;
-
-	if (huart == uartRight.handler) {
-		uart = &uartRight;
-	} else if (huart == uartLeft.handler) {
-		uart = &uartLeft;
-	} else {
-		return;
-	}
-
-	// Seta flag the dados recebido.
-	uart->rxFlag = 1;
-	// Reinicia recepção.
-	HAL_UARTEx_ReceiveToIdle_DMA(uart->handler, uart->rxBuffer, RXBUFFERSIZE);
-}
-
-void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
-{
-	Uart *uart;
-
-	if (huart == uartRight.handler) {
-		uart = &uartRight;
-	} else if (huart == uartLeft.handler) {
-		uart = &uartLeft;
-	} else {
-		return;
-	}
-
-	// Libera mutex
-	uart->txFlag = 0;
-	return;
-}
 
 /* USER CODE END 4 */
 
