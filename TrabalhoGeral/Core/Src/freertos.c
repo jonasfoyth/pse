@@ -248,11 +248,48 @@ void button_task(void *argument)
 void asynchronousR_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousR_task */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	Telegram tmpTelegram = {0};
+
+	Uart_init(&uartRight);
+
+	while(1) {
+		//Espera até receber um telegrama válido na uart
+		Uart_waitEvent(&uartRight, UartEvent_rxComplete, portMAX_DELAY);
+
+		// Assim que o evento for recebido, verifica se é um broadcast
+		// (tem que ser broadcast, se não alguém está fazendo coisa errada, mas é bom verificar)
+
+		if (uartLeft.rxBuffer.id != 255) {
+			// Alguém fez algo errado, apenas ignora a mensagem
+			continue;
+		}
+
+		// Se o ID é de requisição do EV (display), então: (da pra mudar a ordem, deixei assim pq é melhor pra nós)
+		// 1º Faz a leitura dos dados e retorna para o valor para o EV (que está em alguma posição na direita).
+		// 2º Rapassa a requisição para os dispositivos à esquerda
+
+		// Lê o adc
+
+		// TODO KELVIN
+
+		// Preenche o telegrama
+		tmpTelegram.id = 4;
+		tmpTelegram.data.temperature = 0;	// TODO KELVIN
+//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+
+		// Devolve o valor conforme requisição
+		Uart_startTx(&uartRight, &tmpTelegram);
+
+		// Repassa o telegram para a esquerda
+		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
+		Uart_startTx(&uartLeft, &tmpTelegram);
+
+		// Espera terminar as transmissões
+		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
+		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
+		Uart_waitEvent(&uartLeft, UartEvent_txComplete, 100);
+	}
   /* USER CODE END asynchronousR_task */
 }
 
@@ -270,6 +307,8 @@ void asynchronousR_task(void *argument)
 void asynchronousL_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousL_task */
+	Uart_init(&uartLeft);
+
 	while(1) {
 		//Espera até receber um telegrama válido na uart
 		Uart_waitEvent(&uartLeft, UartEvent_rxComplete, portMAX_DELAY);

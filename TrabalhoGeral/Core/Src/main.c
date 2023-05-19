@@ -95,9 +95,6 @@ int main(void)
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 
-  Uart_init(&uartRight);
-  Uart_init(&uartLeft);
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
