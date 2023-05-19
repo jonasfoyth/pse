@@ -261,6 +261,8 @@ void asynchronousR_task(void *argument)
 * @brief Function implementing the asynchronousL thread.
 * 			Responsável por tratar todos os telegramas recebidos da uart da esquerda,
 * 			que não está ligada ao EV (display)
+*
+* 			Essa task poderia estar totalmente implementada n
 * @param argument: Not used
 * @retval None
 */
@@ -270,12 +272,15 @@ void asynchronousL_task(void *argument)
   /* USER CODE BEGIN asynchronousL_task */
 	while(1) {
 		//Espera até receber um telegrama válido na uart
-//		Uart_waitEvent(&uartLeft, UartEvent_rxComplete, portMAX_DELAY);
+		Uart_waitEvent(&uartLeft, UartEvent_rxComplete, portMAX_DELAY);
 
 		// Assim que o evento for recebido, repassa o que foi recebido na uart da esquerda para
 		// a uart da direita.
 		// Só precisamos repassar, pois nunca vai ter uma requisição vindo da esquerda.
 		Uart_startTx(&uartRight, &uartLeft.rxBuffer);
+
+		// Espera a uart terminar a transmissão por no máximo 100ms (1 tick = 1ms );
+		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
 	}
   /* USER CODE END asynchronousL_task */
 }
