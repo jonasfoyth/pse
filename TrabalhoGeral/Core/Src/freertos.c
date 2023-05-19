@@ -210,11 +210,12 @@ void StartDefaultTask(void *argument)
 void periodic_task(void *argument)
 {
   /* USER CODE BEGIN periodic_task */
-  /* Infinite loop */
-  for(;;)
-  {
+	Telegram tmpTelegram = {0};
+
+	while(1) {
 	//Espera os 10ms (100hz)
-	  vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, parei aqui por essa noite kk
+//	  vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, pois ela garante um período fixo.
+		//parei aqui por essa noite kk
 
 
 	// Lê o adc
@@ -229,10 +230,6 @@ void periodic_task(void *argument)
 
 	// Envia o valor pra direita somente, pois é o sentido do display.
 	Uart_startTx(&uartRight, &tmpTelegram);
-
-	// Espera terminar as transmissões
-	// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-	Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
   }
   /* USER CODE END periodic_task */
 }
@@ -247,6 +244,8 @@ void periodic_task(void *argument)
 void button_task(void *argument)
 {
   /* USER CODE BEGIN button_task */
+	Telegram tmpTelegram = {0};
+
 	while(1) {
 		//Espera até o botão ser apertado
 
@@ -263,10 +262,6 @@ void button_task(void *argument)
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
 		Uart_startTx(&uartRight, &tmpTelegram);
-
-		// Espera terminar as transmissões
-		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
 	}
   /* USER CODE END button_task */
 }
@@ -319,11 +314,6 @@ void asynchronousR_task(void *argument)
 		// Repassa o telegram para a esquerda
 		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
 		Uart_startTx(&uartLeft, &tmpTelegram);
-
-		// Espera terminar as transmissões
-		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
-		Uart_waitEvent(&uartLeft, UartEvent_txComplete, 100);
 	}
   /* USER CODE END asynchronousR_task */
 }
@@ -352,10 +342,7 @@ void asynchronousL_task(void *argument)
 		// a uart da direita.
 		// Só precisamos repassar, pois nunca vai ter uma requisição vindo da esquerda.
 		Uart_startTx(&uartRight, &uartLeft.rxBuffer);
-
-		// Espera a uart terminar a transmissão por no máximo 100ms (1 tick = 1ms );
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
-	}
+    }
   /* USER CODE END asynchronousL_task */
 }
 
