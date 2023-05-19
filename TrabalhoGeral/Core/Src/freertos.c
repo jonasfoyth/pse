@@ -355,6 +355,7 @@ void asynchronousL_task(void *argument)
 
 		// Espera a uart terminar a transmissão por no máximo 100ms (1 tick = 1ms );
 		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
+    NÃO PRECISA DO TXEVENT, FAZER UM MUTEX DENTRO DO START TX, ASSIM NÃO VAI TER PROBLEMA DE MANDAR MAIS DE UM DADO POR VEZ E O SISTEMA N FICA ESPERANDO POR EVENTOS DESNECESSÁRIOS
 	}
   /* USER CODE END asynchronousL_task */
 }
