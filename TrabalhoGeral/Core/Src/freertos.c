@@ -59,21 +59,28 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t periodic100hzHandle;
 const osThreadAttr_t periodic100hz_attributes = {
   .name = "periodic100hz",
-  .stack_size = 128 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for buttonHandler */
 osThreadId_t buttonHandlerHandle;
 const osThreadAttr_t buttonHandler_attributes = {
   .name = "buttonHandler",
-  .stack_size = 128 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for asynchronous */
-osThreadId_t asynchronousHandle;
-const osThreadAttr_t asynchronous_attributes = {
-  .name = "asynchronous",
-  .stack_size = 128 * 4,
+/* Definitions for asynchronousR */
+osThreadId_t asynchronousRHandle;
+const osThreadAttr_t asynchronousR_attributes = {
+  .name = "asynchronousR",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for asynchronousL */
+osThreadId_t asynchronousLHandle;
+const osThreadAttr_t asynchronousL_attributes = {
+  .name = "asynchronousL",
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -85,9 +92,43 @@ const osThreadAttr_t asynchronous_attributes = {
 void StartDefaultTask(void *argument);
 void periodic_task(void *argument);
 void button_task(void *argument);
-void asynchronous_task(void *argument);
+void asynchronousR_task(void *argument);
+void asynchronousL_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* Hook prototypes */
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
+void vApplicationMallocFailedHook(void);
+
+/* USER CODE BEGIN 4 */
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+{
+   /* Run time stack overflow checking is performed if
+   configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
+   called if a stack overflow is detected. */
+	__disable_irq();
+	while(1);
+}
+/* USER CODE END 4 */
+
+/* USER CODE BEGIN 5 */
+void vApplicationMallocFailedHook(void)
+{
+   /* vApplicationMallocFailedHook() will only be called if
+   configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h. It is a hook
+   function that will get called if a call to pvPortMalloc() fails.
+   pvPortMalloc() is called internally by the kernel whenever a task, queue,
+   timer or semaphore is created. It is also called by various parts of the
+   demo application. If heap_1.c or heap_2.c are used, then the size of the
+   heap available to pvPortMalloc() is defined by configTOTAL_HEAP_SIZE in
+   FreeRTOSConfig.h, and the xPortGetFreeHeapSize() API function can be used
+   to query the size of free heap space that remains (although it does not
+   provide information on how the remaining heap might be fragmented). */
+	__disable_irq();
+	while(1);
+}
+/* USER CODE END 5 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -125,8 +166,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of buttonHandler */
   buttonHandlerHandle = osThreadNew(button_task, NULL, &buttonHandler_attributes);
 
-  /* creation of asynchronous */
-  asynchronousHandle = osThreadNew(asynchronous_task, NULL, &asynchronous_attributes);
+  /* creation of asynchronousR */
+  asynchronousRHandle = osThreadNew(asynchronousR_task, NULL, &asynchronousR_attributes);
+
+  /* creation of asynchronousL */
+  asynchronousLHandle = osThreadNew(asynchronousL_task, NULL, &asynchronousL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -192,22 +236,40 @@ void button_task(void *argument)
   /* USER CODE END button_task */
 }
 
-/* USER CODE BEGIN Header_asynchronous_task */
+/* USER CODE BEGIN Header_asynchronousR_task */
 /**
-* @brief Function implementing the asynchronous thread.
+* @brief Function implementing the asynchronousR thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_asynchronous_task */
-void asynchronous_task(void *argument)
+/* USER CODE END Header_asynchronousR_task */
+void asynchronousR_task(void *argument)
 {
-  /* USER CODE BEGIN asynchronous_task */
+  /* USER CODE BEGIN asynchronousR_task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END asynchronous_task */
+  /* USER CODE END asynchronousR_task */
+}
+
+/* USER CODE BEGIN Header_asynchronousL_task */
+/**
+* @brief Function implementing the asynchronousL thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_asynchronousL_task */
+void asynchronousL_task(void *argument)
+{
+  /* USER CODE BEGIN asynchronousL_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END asynchronousL_task */
 }
 
 /* Private application code --------------------------------------------------*/
