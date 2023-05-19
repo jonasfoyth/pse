@@ -7,6 +7,10 @@
 #include "Telegram.h"
 #include "usart.h"
 
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+
 // Enum for uart event
 typedef enum {
 	UartEvent_rxComplete,
@@ -18,9 +22,15 @@ typedef enum {
 
 typedef struct {
 	UART_HandleTypeDef *const handler;
-	int event[NumberOfUartEvents];
+
+	StaticSemaphore_t eventBuffer[NumberOfUartEvents];
+	SemaphoreHandle_t event[NumberOfUartEvents];
+
 	Telegram rxBuffer;
 	Telegram txBuffer;
+
+	StaticSemaphore_t txLockBuffer;
+	SemaphoreHandle_t txLock;
 } Uart;
 
 

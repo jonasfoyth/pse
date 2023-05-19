@@ -1,7 +1,6 @@
 #include "Uart.h"
 
 //#include "main.h"
-#include "cmsis_os2.h"
 
 #define UART_RXBUFFERSIZE 26
 
@@ -17,8 +16,17 @@ static void Uart_rxErrorCallback(Uart * const this);
 
 void Uart_init(Uart * const this)
 {
+	// Initialize the ID
 	this->txBuffer.id = 4;
+
 	// Initialize events
+	for (int i = 0; i < NumberOfUartEvents; i++) {
+		this->event[i] = xSemaphoreCreateBinaryStatic(&this->eventBuffer[i]);
+	}
+
+	// Initialize tx lock
+	this->txLock = xSemaphoreCreateBinaryStatic(&this->txLockBuffer);
+	xSemaphoreGive(this->txLock);
 
 	// Start the reception
 	Uart_startRx(this);
@@ -27,11 +35,19 @@ void Uart_init(Uart * const this)
 void Uart_deinit(Uart * const this)
 {
 	HAL_UART_Abort(this->handler);
-}
 
+	// Deinitialize events
+	for (int i = 0; i < NumberOfUartEvents; i++) {
+		vSemaphoreDelete(this->event[i]);
+	}
+
+	vSemaphoreDelete(this->txLock);
+}
 
 void Uart_startTx(Uart * const this, Telegram * const msg)
 {
+	xSemaphoreTake(this->txLock, 20);	//Wait at most 20ms
+
 	// Salva a mensagem no próprio buffer
 	this->txBuffer.id = msg->id;
 	this->txBuffer.data.temperature = msg->data.temperature;
@@ -53,12 +69,14 @@ void Uart_startRx(Uart * this)
 
 void Uart_setEvent(Uart * const this, UartEvents event)
 {
-	// Release the semaphore
+	// give a semaphore
+	xSemaphoreGive(this->event[event]);
 }
 
 void Uart_setEventFromISR(Uart * const this, UartEvents event)
 {
-	// Release the semaphore
+	// give a semaphore
+	xSemaphoreGiveFromISR(this->event[event], NULL);
 }
 
 /*
@@ -68,7 +86,11 @@ void Uart_setEventFromISR(Uart * const this, UartEvents event)
 int Uart_waitEvent(Uart * const this, UartEvents event, uint32_t timeout)
 {
 	// wait for semaphore
-	return -1;
+	if (xSemaphoreTake(this->event[event], timeout) == pdFALSE) {
+		return -1;
+	}
+
+	return 0;
 }
 
 
@@ -77,6 +99,9 @@ static void Uart_txCompleteCallback(Uart * const this)
 {
 	// Seta flag the dados transmitidos.
 	Uart_setEventFromISR(this, UartEvent_txComplete);
+
+	// Libera uart para que outra task possa fazer a transmissão
+	xSemaphoreGiveFromISR(this->txLock, NULL);
 }
 
 static void Uart_rxCompleteCallback(Uart * const this)
