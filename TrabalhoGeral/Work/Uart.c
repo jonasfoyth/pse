@@ -1,4 +1,6 @@
 #include "Uart.h"
+
+//#include "main.h"
 #include "cmsis_os2.h"
 
 #define UART_RXBUFFERSIZE 26
@@ -28,18 +30,25 @@ void Uart_deinit(Uart * const this)
 }
 
 
-void Uart_startTx(Uart * this, float temperature)
+void Uart_startTx(Uart * const this, Telegram * const msg)
 {
-	this->txBuffer.data.temperature = temperature;
+	// Salva a mensagem no próprio buffer
+	this->txBuffer.id = msg->id;
+	this->txBuffer.data.temperature = msg->data.temperature;
+	this->txBuffer.data.dontCare1 = msg->data.dontCare1;
+	this->txBuffer.data.dontCare2 = msg->data.dontCare2;
 
-	HAL_UART_Transmit_DMA(this->handler, this->txBuffer, sizeof(Telegram));
-	__HAL_DMA_DISABLE_IT(this->handler->hdmarx, DMA_IT_HT);	//Disable useless half transfer here
+	// Envia os dados
+	HAL_UART_Transmit_DMA(this->handler, (uint8_t*)&(this->txBuffer), sizeof(Telegram));
+
+	// Desabilita half transfer interrupt, é inútil pra gente
+	__HAL_DMA_DISABLE_IT(this->handler->hdmarx, DMA_IT_HT);
 }
 
 void Uart_startRx(Uart * this)
 {
-	HAL_UARTEx_ReceiveToIdle_DMA(this->handler, this->rxBuffer, sizeof(Telegram));
-	__HAL_DMA_DISABLE_IT(this->handler->hdmarx, DMA_IT_HT); //Disable useless half transfer here
+	HAL_UARTEx_ReceiveToIdle_DMA(this->handler, (uint8_t*)&(this->rxBuffer), sizeof(Telegram));
+	__HAL_DMA_DISABLE_IT(this->handler->hdmarx, DMA_IT_HT);
 }
 
 void Uart_setEvent(Uart * const this, UartEvents event)
@@ -59,6 +68,7 @@ void Uart_setEventFromISR(Uart * const this, UartEvents event)
 int Uart_waitEvent(Uart * const this, UartEvents event, uint32_t timeout)
 {
 	// wait for semaphore
+	return -1;
 }
 
 

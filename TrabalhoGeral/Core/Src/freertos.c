@@ -53,35 +53,35 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for periodic100hz */
 osThreadId_t periodic100hzHandle;
 const osThreadAttr_t periodic100hz_attributes = {
   .name = "periodic100hz",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for buttonHandler */
 osThreadId_t buttonHandlerHandle;
 const osThreadAttr_t buttonHandler_attributes = {
   .name = "buttonHandler",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for asynchronousR */
 osThreadId_t asynchronousRHandle;
 const osThreadAttr_t asynchronousR_attributes = {
   .name = "asynchronousR",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for asynchronousL */
 osThreadId_t asynchronousLHandle;
 const osThreadAttr_t asynchronousL_attributes = {
   .name = "asynchronousL",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -239,6 +239,8 @@ void button_task(void *argument)
 /* USER CODE BEGIN Header_asynchronousR_task */
 /**
 * @brief Function implementing the asynchronousR thread.
+* 			Responsável por tratar todos os telegramas recebidos da uart da direita,
+* 			que está ligada ao EV (display)
 * @param argument: Not used
 * @retval None
 */
@@ -257,6 +259,8 @@ void asynchronousR_task(void *argument)
 /* USER CODE BEGIN Header_asynchronousL_task */
 /**
 * @brief Function implementing the asynchronousL thread.
+* 			Responsável por tratar todos os telegramas recebidos da uart da esquerda,
+* 			que não está ligada ao EV (display)
 * @param argument: Not used
 * @retval None
 */
@@ -264,11 +268,15 @@ void asynchronousR_task(void *argument)
 void asynchronousL_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousL_task */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	while(1) {
+		//Espera até receber um telegrama válido na uart
+//		Uart_waitEvent(&uartLeft, UartEvent_rxComplete, portMAX_DELAY);
+
+		// Assim que o evento for recebido, repassa o que foi recebido na uart da esquerda para
+		// a uart da direita.
+		// Só precisamos repassar, pois nunca vai ter uma requisição vindo da esquerda.
+		Uart_startTx(&uartRight, &uartLeft.rxBuffer);
+	}
   /* USER CODE END asynchronousL_task */
 }
 

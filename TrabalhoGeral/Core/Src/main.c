@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Uart.h"
 
 /* USER CODE END Includes */
 
@@ -93,6 +94,9 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
+
+  Uart_init(&uartRight);
+  Uart_init(&uartLeft);
 
   /* USER CODE END 2 */
 
