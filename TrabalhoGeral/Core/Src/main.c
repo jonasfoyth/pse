@@ -17,8 +17,11 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <Sensor.h>
+#include <Sensor.h>
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
@@ -26,7 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
-
+#include "Sensor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,7 +96,11 @@ int main(void)
   MX_DMA_Init();
   MX_UART4_Init();
   MX_UART5_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+
+  // inicialização do DMA com a variável para armazenar as medições lidas do ADC
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_reads, 2);
 
   /* USER CODE END 2 */
 
@@ -106,10 +113,12 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
   while (1)
   {
     /* USER CODE END WHILE */
-
+    
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

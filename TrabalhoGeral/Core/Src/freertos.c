@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
+#include "Sensor.h"
 
 /* USER CODE END Includes */
 
@@ -46,6 +47,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+float temperature = 0;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -210,29 +212,33 @@ void StartDefaultTask(void *argument)
 void periodic_task(void *argument)
 {
   /* USER CODE BEGIN periodic_task */
+  TickType_t pxPreviousWakeTime = xTaskGetTickCount();
+  Telegram tmpTelegram = {0};
+
   /* Infinite loop */
   for(;;)
   {
-	//Espera os 10ms (100hz)
-	  vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, parei aqui por essa noite kk
+    //Espera os 10ms (100hz)
+    vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, parei aqui por essa noite kk
 
 
-	// Lê o adc
+    // Converte valores do ADC copiando os valores para a função
+    temperature = get_temperature(adc_reads[0], adc_reads[1]);
 
-	// TODO KELVIN
+    // TODO KELVIN
 
-	// Preenche o telegrama
-	tmpTelegram.id = 4;
-	tmpTelegram.data.temperature = 0;	// TODO KELVIN
-	//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-	//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+    // Preenche o telegrama
+    tmpTelegram.id = 4;
+    tmpTelegram.data.temperature = temperature;	// TODO KELVIN
+    //		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+    //		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-	// Envia o valor pra direita somente, pois é o sentido do display.
-	Uart_startTx(&uartRight, &tmpTelegram);
+    // Envia o valor pra direita somente, pois é o sentido do display.
+    Uart_startTx(&uartRight, &tmpTelegram);
 
-	// Espera terminar as transmissões
-	// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-	Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
+    // Espera terminar as transmissões
+    // Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
+    Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
   }
   /* USER CODE END periodic_task */
 }
@@ -247,6 +253,7 @@ void periodic_task(void *argument)
 void button_task(void *argument)
 {
   /* USER CODE BEGIN button_task */
+	Telegram tmpTelegram = {0};
 	while(1) {
 		//Espera até o botão ser apertado
 
