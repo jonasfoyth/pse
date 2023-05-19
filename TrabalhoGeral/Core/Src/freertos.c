@@ -213,7 +213,26 @@ void periodic_task(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	//Espera os 10ms (100hz)
+	  vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, parei aqui por essa noite kk
+
+
+	// Lê o adc
+
+	// TODO KELVIN
+
+	// Preenche o telegrama
+	tmpTelegram.id = 4;
+	tmpTelegram.data.temperature = 0;	// TODO KELVIN
+	//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+	//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+
+	// Envia o valor pra direita somente, pois é o sentido do display.
+	Uart_startTx(&uartRight, &tmpTelegram);
+
+	// Espera terminar as transmissões
+	// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
+	Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
   }
   /* USER CODE END periodic_task */
 }
@@ -228,11 +247,27 @@ void periodic_task(void *argument)
 void button_task(void *argument)
 {
   /* USER CODE BEGIN button_task */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	while(1) {
+		//Espera até o botão ser apertado
+
+
+		// Lê o adc
+
+		// TODO KELVIN
+
+		// Preenche o telegrama
+		tmpTelegram.id = 4;
+		tmpTelegram.data.temperature = 0;	// TODO KELVIN
+//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+
+		// Envia o valor pra direita somente, pois é o sentido do display.
+		Uart_startTx(&uartRight, &tmpTelegram);
+
+		// Espera terminar as transmissões
+		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
+		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
+	}
   /* USER CODE END button_task */
 }
 
