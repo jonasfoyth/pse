@@ -192,11 +192,10 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	while (1) {
+		vTaskDelay(10000);
+	}
   /* USER CODE END StartDefaultTask */
 }
 
@@ -212,25 +211,28 @@ void periodic_task(void *argument)
   /* USER CODE BEGIN periodic_task */
 	Telegram tmpTelegram = {0};
 
+	TickType_t xLastWakeTime;
+	const TickType_t xPeriod = 10; // In ticks
+
+	xLastWakeTime = xTaskGetTickCount();
+
 	while(1) {
-	//Espera os 10ms (100hz)
-//	  vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, pois ela garante um período fixo.
-		//parei aqui por essa noite kk
+		//Espera os 10ms (100hz)
+		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 
+		// Lê o adc
 
-	// Lê o adc
+		// TODO KELVIN
 
-	// TODO KELVIN
+		// Preenche o telegrama
+		tmpTelegram.id = 4;
+		tmpTelegram.data.temperature = 0;	// TODO KELVIN
+		//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+		//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-	// Preenche o telegrama
-	tmpTelegram.id = 4;
-	tmpTelegram.data.temperature = 0;	// TODO KELVIN
-	//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-	//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
-
-	// Envia o valor pra direita somente, pois é o sentido do display.
-	Uart_startTx(&uartRight, &tmpTelegram);
-  }
+		// Envia o valor pra direita somente, pois é o sentido do display.
+		Uart_startTx(&uartRight, &tmpTelegram);
+	}
   /* USER CODE END periodic_task */
 }
 
