@@ -194,11 +194,10 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+
+	while (1) {
+		vTaskDelay(10000);
+	}
   /* USER CODE END StartDefaultTask */
 }
 
@@ -212,15 +211,16 @@ void StartDefaultTask(void *argument)
 void periodic_task(void *argument)
 {
   /* USER CODE BEGIN periodic_task */
-  TickType_t pxPreviousWakeTime = xTaskGetTickCount();
-  Telegram tmpTelegram = {0};
+	Telegram tmpTelegram = {0};
 
-  /* Infinite loop */
-  for(;;)
-  {
-    //Espera os 10ms (100hz)
-    vTaskDelayUntil(pxPreviousWakeTime, 10); // Usar essa função, parei aqui por essa noite kk
+	TickType_t xLastWakeTime;
+	const TickType_t xPeriod = 10; // In ticks
 
+	xLastWakeTime = xTaskGetTickCount();
+
+	while(1) {
+		//Espera os 10ms (100hz)
+		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 
     // Converte valores do ADC copiando os valores para a função
     temperature = get_temperature(adc_reads[0], adc_reads[1]);
@@ -233,13 +233,9 @@ void periodic_task(void *argument)
     //		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
     //		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-    // Envia o valor pra direita somente, pois é o sentido do display.
-    Uart_startTx(&uartRight, &tmpTelegram);
-
-    // Espera terminar as transmissões
-    // Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-    Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
-  }
+		// Envia o valor pra direita somente, pois é o sentido do display.
+		Uart_startTx(&uartRight, &tmpTelegram);
+	}
   /* USER CODE END periodic_task */
 }
 
@@ -270,10 +266,6 @@ void button_task(void *argument)
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
 		Uart_startTx(&uartRight, &tmpTelegram);
-
-		// Espera terminar as transmissões
-		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
 	}
   /* USER CODE END button_task */
 }
@@ -326,11 +318,6 @@ void asynchronousR_task(void *argument)
 		// Repassa o telegram para a esquerda
 		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
 		Uart_startTx(&uartLeft, &tmpTelegram);
-
-		// Espera terminar as transmissões
-		// Ver se precisa mesmo, talvez só o semaforo/mutex dentro da Uart_startTx seja suficiente e mais eficiente.
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
-		Uart_waitEvent(&uartLeft, UartEvent_txComplete, 100);
 	}
   /* USER CODE END asynchronousR_task */
 }
@@ -359,10 +346,7 @@ void asynchronousL_task(void *argument)
 		// a uart da direita.
 		// Só precisamos repassar, pois nunca vai ter uma requisição vindo da esquerda.
 		Uart_startTx(&uartRight, &uartLeft.rxBuffer);
-
-		// Espera a uart terminar a transmissão por no máximo 100ms (1 tick = 1ms );
-		Uart_waitEvent(&uartRight, UartEvent_txComplete, 100);
-	}
+    }
   /* USER CODE END asynchronousL_task */
 }
 
