@@ -22,7 +22,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "Button.h"
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
@@ -82,7 +82,9 @@ void MX_GPIO_Init(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	// schedule to read the adc here
+	if (GPIO_Pin == B1_Pin) {
+		Button_Pressed();
+	}
 	return;
 }
 

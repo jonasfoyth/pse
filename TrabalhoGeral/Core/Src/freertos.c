@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
 #include "Sensor.h"
+#include "Button.h"
 
 /* USER CODE END Includes */
 
@@ -211,7 +212,7 @@ void StartDefaultTask(void *argument)
 void periodic_task(void *argument)
 {
   /* USER CODE BEGIN periodic_task */
-  float temperature = 0;
+	float temperature = 0;
 
 	Telegram tmpTelegram = {0};
 	TickType_t xLastWakeTime;
@@ -224,14 +225,14 @@ void periodic_task(void *argument)
 		//Espera os 10ms (100hz)
 		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 
-    // Leitura do valor de temperatura
+		// Leitura do valor de temperatura
 		Sensor_Read(&temperature);
 
-    // Preenche o telegrama
-    tmpTelegram.id = 4;
-    tmpTelegram.data.temperature = temperature;	// TODO KELVIN
-    //		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-    //		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+		// Preenche o telegrama
+		tmpTelegram.id = 4;
+		tmpTelegram.data.temperature = temperature;	// TODO KELVIN
+		//tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+		//tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
 		Uart_startTx(&uartRight, &tmpTelegram);
@@ -251,23 +252,23 @@ void button_task(void *argument)
   /* USER CODE BEGIN button_task */
 	Telegram tmpTelegram = {0};
 
-  float temperature = 0;
+	float temperature = 0;
 
 	while(1) {
 		//Espera até o botão ser apertado
+		if (Button_Wait()) {
+			// Lê o adc
+			Sensor_Read(&temperature);
 
+			// Preenche o telegrama
+			tmpTelegram.id = 4;
+			tmpTelegram.data.temperature = temperature;
+			//tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+			//tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-		// Lê o adc
-    Sensor_Read(&temperature);
-
-		// Preenche o telegrama
-		tmpTelegram.id = 4;
-		tmpTelegram.data.temperature = temperature;
-    //tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-    //tmpTelegram.data.dontCare2 = 0; // Nem com esse
-
-		// Envia o valor pra direita somente, pois é o sentido do display.
-		Uart_startTx(&uartRight, &tmpTelegram);
+			// Envia o valor pra direita somente, pois é o sentido do display.
+			Uart_startTx(&uartRight, &tmpTelegram);
+		}
 	}
   /* USER CODE END button_task */
 }
@@ -286,7 +287,7 @@ void asynchronousR_task(void *argument)
   /* USER CODE BEGIN asynchronousR_task */
 	float temperature = 0;
 
-  Telegram tmpTelegram = {0};
+ 	Telegram tmpTelegram = {0};
 	Uart_init(&uartRight);
 
   
@@ -307,13 +308,13 @@ void asynchronousR_task(void *argument)
 		// 2º Rapassa a requisição para os dispositivos à esquerda
 
 		// Lê o adc
-    Sensor_Read(&temperature);
+		Sensor_Read(&temperature);
 
 		// Preenche o telegrama
 		tmpTelegram.id = 4;
 		tmpTelegram.data.temperature = temperature;
-    //tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-    //tmpTelegram.data.dontCare2 = 0; // Nem com esse
+		//tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+		//tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
 		// Devolve o valor conforme requisição
 		Uart_startTx(&uartRight, &tmpTelegram);

@@ -100,7 +100,7 @@ int main(void)
   
   // inicialização rotinas sensor
   Sensor_Init();
-
+  Button_Init();
   // inicialização DMA para o ADC1
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_reads, 2);
 
