@@ -1,3 +1,5 @@
+// main
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -17,8 +19,6 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <Sensor.h>
-#include <Sensor.h>
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
@@ -57,7 +57,6 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -98,8 +97,11 @@ int main(void)
   MX_UART5_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+  
+  // inicialização rotinas sensor
+  Sensor_Init();
 
-  // inicialização do DMA com a variável para armazenar as medições lidas do ADC
+  // inicialização DMA para o ADC1
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_reads, 2);
 
   /* USER CODE END 2 */
