@@ -22,10 +22,14 @@
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
+#ifdef EXECUTAR_TESTES
+#include "stdio.h"
+#include "unity.h"
+#include "tests.h"
+#endif
 
 /* USER CODE END Includes */
 
@@ -69,7 +73,14 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  #ifdef EXECUTAR_TESTES
+  printf("\nIniciando execução dos testes");
+  UNITY_BEGIN();
+  RUN_TEST(uart_tx_1);
+  RUN_TEST(uart_tx_5);
 
+  UNITY_END();
+  #endif
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -85,6 +96,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+
 
   /* USER CODE END SysInit */
 
