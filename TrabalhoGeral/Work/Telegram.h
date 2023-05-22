@@ -25,7 +25,7 @@ typedef struct {
 	float dontCare2;
 } Telegram_data;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	Telegram_id id;
 	Telegram_data data;
 } Telegram;

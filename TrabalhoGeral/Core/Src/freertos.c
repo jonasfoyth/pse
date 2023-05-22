@@ -63,14 +63,14 @@ osThreadId_t periodic100hzHandle;
 const osThreadAttr_t periodic100hz_attributes = {
   .name = "periodic100hz",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for buttonHandler */
 osThreadId_t buttonHandlerHandle;
 const osThreadAttr_t buttonHandler_attributes = {
   .name = "buttonHandler",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for asynchronousR */
 osThreadId_t asynchronousRHandle;
@@ -219,7 +219,6 @@ void periodic_task(void *argument)
 	const TickType_t xPeriod = 10; // In ticks
 
 	xLastWakeTime = xTaskGetTickCount();
-	
 		
 	while(1) {
 		//Espera os 10ms (100hz)
@@ -231,8 +230,8 @@ void periodic_task(void *argument)
 		// Preenche o telegrama
 		tmpTelegram.id = 4;
 		tmpTelegram.data.temperature = temperature;	// TODO KELVIN
-		//tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-		//tmpTelegram.data.dontCare2 = 0; // Nem com esse
+		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
 		Uart_startTx(&uartRight, &tmpTelegram);
@@ -288,8 +287,6 @@ void asynchronousR_task(void *argument)
 	float temperature = 0;
 
  	Telegram tmpTelegram = {0};
-	Uart_init(&uartRight);
-
   
 	while(1) {
 		//Espera até receber um telegrama válido na uart
@@ -298,7 +295,7 @@ void asynchronousR_task(void *argument)
 		// Assim que o evento for recebido, verifica se é um broadcast
 		// (tem que ser broadcast, se não alguém está fazendo coisa errada, mas é bom verificar)
 
-		if (uartLeft.rxBuffer.id != 255) {
+		if (uartRight.rxBuffer.id != 255) {
 			// Alguém fez algo errado, apenas ignora a mensagem
 			continue;
 		}
@@ -318,6 +315,8 @@ void asynchronousR_task(void *argument)
 
 		// Devolve o valor conforme requisição
 		Uart_startTx(&uartRight, &tmpTelegram);
+
+		vTaskDelay(1);
 
 		// Repassa o telegram para a esquerda
 		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
@@ -340,7 +339,6 @@ void asynchronousR_task(void *argument)
 void asynchronousL_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousL_task */
-	Uart_init(&uartLeft);
 
 	while(1) {
 		//Espera até receber um telegrama válido na uart

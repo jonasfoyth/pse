@@ -8,6 +8,7 @@
 
 #define BUTTON_BIT	( 1 << 0 )
 
+void Button_Init();
 int Button_Wait();
 void Button_Pressed();
 

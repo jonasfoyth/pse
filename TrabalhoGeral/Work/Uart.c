@@ -93,15 +93,14 @@ int Uart_waitEvent(Uart * const this, UartEvents event, uint32_t timeout)
 	return 0;
 }
 
-
 // Essas funções serão chamadas sempre pelos interrupt handlers
 static void Uart_txCompleteCallback(Uart * const this)
 {
-	// Seta flag the dados transmitidos.
-	Uart_setEventFromISR(this, UartEvent_txComplete);
-
 	// Libera uart para que outra task possa fazer a transmissão
 	xSemaphoreGiveFromISR(this->txLock, NULL);
+
+	// Seta flag the dados transmitidos.
+	Uart_setEventFromISR(this, UartEvent_txComplete);
 }
 
 static void Uart_rxCompleteCallback(Uart * const this)
