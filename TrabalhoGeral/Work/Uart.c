@@ -46,7 +46,7 @@ void Uart_deinit(Uart * const this)
 
 void Uart_startTx(Uart * const this, Telegram * const msg)
 {
-	xSemaphoreTake(this->txLock, 20);	//Wait at most 20ms
+	xSemaphoreTake(this->txLock, portMAX_DELAY);	//Wait at most 20ms
 
 	// Salva a mensagem no próprio buffer
 	this->txBuffer.id = msg->id;
@@ -183,7 +183,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	return;
 }
 
-void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	Uart *uart;
 

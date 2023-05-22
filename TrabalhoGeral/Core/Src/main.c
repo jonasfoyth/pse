@@ -97,8 +97,8 @@ int main(void)
   MX_UART5_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-	Uart_init(&uartLeft);
-	Uart_init(&uartRight);
+  Uart_init(&uartLeft);
+  Uart_init(&uartRight);
   
   // inicialização rotinas sensor
   Sensor_Init();

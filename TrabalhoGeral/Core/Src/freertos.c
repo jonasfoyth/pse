@@ -295,7 +295,7 @@ void asynchronousR_task(void *argument)
 		// Assim que o evento for recebido, verifica se é um broadcast
 		// (tem que ser broadcast, se não alguém está fazendo coisa errada, mas é bom verificar)
 
-		if (uartRight.rxBuffer.id != 255) {
+		if (uartRight.rxBuffer.id != Requisition) {
 			// Alguém fez algo errado, apenas ignora a mensagem
 			continue;
 		}

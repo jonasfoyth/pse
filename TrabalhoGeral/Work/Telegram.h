@@ -14,7 +14,7 @@ typedef enum {
 	Display = 1,
 	Accel,
 	Gyro,
-	Temp,
+	Temperature,
 	Potenciometer,
 	Requisition = 255,
 } Telegram_id;
