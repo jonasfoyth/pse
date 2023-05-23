@@ -30,4 +30,11 @@ typedef struct {
 	Telegram_data data;
 } Telegram;
 
+typedef enum {
+	ERRO_OK,
+	ERRO_VALOR_INVALIDO
+} Erro;
+
+Erro criarStruct(Telegram* telegram,  Telegram_id id, float data);
+
 #endif /* INC_TELEGRAM_H_ */

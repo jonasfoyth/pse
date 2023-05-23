@@ -225,13 +225,14 @@ void periodic_task(void *argument)
 		// TODO KELVIN
 
 		// Preenche o telegrama
-		tmpTelegram.id = 4;
-		tmpTelegram.data.temperature = 0;	// TODO KELVIN
-		//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-		//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+		Erro erro = criarStruct(&tmpTelegram, 4, 0); // TODO KELVIN
+		if (erro == ERRO_OK) {
+			Uart_startTx(&uartRight, &tmpTelegram);
+			//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+			//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
+		};
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
-		Uart_startTx(&uartRight, &tmpTelegram);
 	}
   /* USER CODE END periodic_task */
 }
@@ -257,13 +258,16 @@ void button_task(void *argument)
 		// TODO KELVIN
 
 		// Preenche o telegrama
-		tmpTelegram.id = 4;
-		tmpTelegram.data.temperature = 0;	// TODO KELVIN
+		Erro erro = criarStruct(&tmpTelegram, 4, 0); // TODO KELVIN
+		if (erro == ERRO_OK) {
+			Uart_startTx(&uartRight, &tmpTelegram);
+		};
+//		tmpTelegram.id = 4;
+//		tmpTelegram.data.temperature = 0;	// TODO KELVIN
 //		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
 //		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
 		// Envia o valor pra direita somente, pois é o sentido do display.
-		Uart_startTx(&uartRight, &tmpTelegram);
 	}
   /* USER CODE END button_task */
 }
@@ -305,17 +309,19 @@ void asynchronousR_task(void *argument)
 		// TODO KELVIN
 
 		// Preenche o telegrama
-		tmpTelegram.id = 4;
-		tmpTelegram.data.temperature = 0;	// TODO KELVIN
-//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-		// Devolve o valor conforme requisição
-		Uart_startTx(&uartRight, &tmpTelegram);
+		Erro erro = criarStruct(&tmpTelegram, 4, 0);
+		if (erro == ERRO_OK) {
+			Uart_startTx(&uartRight, &tmpTelegram);
+			//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
+			//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 
-		// Repassa o telegram para a esquerda
-		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
-		Uart_startTx(&uartLeft, &tmpTelegram);
+			// Devolve o valor conforme requisição
+			// Repassa o telegram para a esquerda
+			tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
+			Uart_startTx(&uartLeft, &tmpTelegram);
+		};
+
 	}
   /* USER CODE END asynchronousR_task */
 }

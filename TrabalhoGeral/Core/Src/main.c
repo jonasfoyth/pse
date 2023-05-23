@@ -26,7 +26,6 @@
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
 #ifdef EXECUTAR_TESTES
-#include "stdio.h"
 #include "unity.h"
 #include "tests.h"
 #endif
@@ -74,11 +73,14 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   #ifdef EXECUTAR_TESTES
-  printf("\nIniciando execução dos testes");
   UNITY_BEGIN();
+  TEST_MESSAGE("INICIO DA EXECUÇÃO DOS TESTES");
   RUN_TEST(uart_tx_1);
+  RUN_TEST(uart_tx_2);
+  RUN_TEST(uart_tx_3);
+  RUN_TEST(uart_tx_4);
   RUN_TEST(uart_tx_5);
-
+  TEST_MESSAGE("FIM DA EXECUÇÃO DOS TESTES");
   UNITY_END();
   #endif
   /* USER CODE END 1 */
