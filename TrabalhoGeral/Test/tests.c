@@ -131,23 +131,23 @@ void adc_5(void) {
 
 // ebd: adc test functions
 void begin_tests(void) {
-	TEST_MESSAGE("BEGIN OF TESTS EXECUTION");
+	TEST_MESSAGE("BEGIN OF TESTS EXECUTION\n");
 
 	UNITY_BEGIN();
     // adc
-    adc_1();
-    adc_2();
-    adc_3();
-    adc_4();
-    adc_5();
+	RUN_TEST(adc_1);
+	RUN_TEST(adc_2);
+	RUN_TEST(adc_3);
+	RUN_TEST(adc_4);
+	RUN_TEST(adc_5);
 	// uart
-    uart_tx_1();
-    uart_tx_2();
-    uart_tx_3();
-    uart_tx_4();
-    uart_tx_5();
+	RUN_TEST(uart_tx_1);
+	RUN_TEST(uart_tx_2);
+	RUN_TEST(uart_tx_3);
+	RUN_TEST(uart_tx_4);
+	RUN_TEST(uart_tx_5);
     UNITY_END();
-    TEST_MESSAGE("END OF TESTS EXECUTION");
+    TEST_MESSAGE("END OF TESTS EXECUTION\n");
 }
 
 
