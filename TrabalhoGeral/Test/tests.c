@@ -134,22 +134,20 @@ void begin_tests(void) {
 	TEST_MESSAGE("BEGIN OF TESTS EXECUTION");
 
 	UNITY_BEGIN();
-	// uart
     // adc
     adc_1();
     adc_2();
     adc_3();
     adc_4();
     adc_5();
+	// uart
     uart_tx_1();
     uart_tx_2();
     uart_tx_3();
     uart_tx_4();
     uart_tx_5();
     UNITY_END();
-//    TEST_MESSAGE("END OF TESTS EXECUTION");
-    // Execução adicional de código
-    // Imprime os resultados dos testes
+    TEST_MESSAGE("END OF TESTS EXECUTION");
 }
 
 
