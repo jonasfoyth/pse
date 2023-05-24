@@ -1,3 +1,5 @@
+// main
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -19,17 +21,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Sensor.h"
 #include "Uart.h"
+#include "stdio.h"
+
 #ifdef EXECUTAR_TESTES
-#include "unity.h"
+#include <stdio.h>
 #include "tests.h"
 #endif
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +63,6 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -72,17 +77,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  #ifdef EXECUTAR_TESTES
-  UNITY_BEGIN();
-  TEST_MESSAGE("INICIO DA EXECUÇÃO DOS TESTES");
-  RUN_TEST(uart_tx_1);
-  RUN_TEST(uart_tx_2);
-  RUN_TEST(uart_tx_3);
-  RUN_TEST(uart_tx_4);
-  RUN_TEST(uart_tx_5);
-  TEST_MESSAGE("FIM DA EXECUÇÃO DOS TESTES");
-  UNITY_END();
-  #endif
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -99,7 +94,6 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -107,7 +101,21 @@ int main(void)
   MX_DMA_Init();
   MX_UART4_Init();
   MX_UART5_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+
+  #ifdef EXECUTAR_TESTES
+  begin_tests();
+  #endif
+
+  Uart_init(&uartLeft);
+  Uart_init(&uartRight);
+  
+  // inicialização rotinas sensor
+  Sensor_Init();
+  Button_Init();
+  // inicialização DMA para o ADC1
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_reads, 2);
 
   /* USER CODE END 2 */
 
@@ -120,10 +128,12 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
   while (1)
   {
     /* USER CODE END WHILE */
-
+    
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

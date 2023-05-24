@@ -3,6 +3,7 @@
 	<name>TrabalhoGeral</name>
 	<comment></comment>
 	<projects>
+		<project>TrabalhoGeral</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

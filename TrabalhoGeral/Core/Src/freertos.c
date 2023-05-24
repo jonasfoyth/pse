@@ -26,6 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
+#include "Sensor.h"
+#include "Button.h"
 
 /* USER CODE END Includes */
 
@@ -46,6 +48,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+float temperature = 0;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -60,14 +63,14 @@ osThreadId_t periodic100hzHandle;
 const osThreadAttr_t periodic100hz_attributes = {
   .name = "periodic100hz",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for buttonHandler */
 osThreadId_t buttonHandlerHandle;
 const osThreadAttr_t buttonHandler_attributes = {
   .name = "buttonHandler",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for asynchronousR */
 osThreadId_t asynchronousRHandle;
@@ -209,30 +212,27 @@ void StartDefaultTask(void *argument)
 void periodic_task(void *argument)
 {
   /* USER CODE BEGIN periodic_task */
-	Telegram tmpTelegram = {0};
+	float temperature = 0;
 
+	Telegram tmpTelegram = {0};
 	TickType_t xLastWakeTime;
 	const TickType_t xPeriod = 10; // In ticks
 
 	xLastWakeTime = xTaskGetTickCount();
-
+		
 	while(1) {
 		//Espera os 10ms (100hz)
 		vTaskDelayUntil( &xLastWakeTime, xPeriod );
 
-		// Lê o adc
-
-		// TODO KELVIN
+		// Leitura do valor de temperatura
+		Sensor_Read(&temperature);
 
 		// Preenche o telegrama
-		Erro erro = criarStruct(&tmpTelegram, 4, 0); // TODO KELVIN
+		Erro erro = criarStruct(&tmpTelegram, 4, temperature); // TODO KELVIN
 		if (erro == ERRO_OK) {
+      // Envia o valor pra direita somente, pois é o sentido do display.
 			Uart_startTx(&uartRight, &tmpTelegram);
-			//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-			//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
 		};
-
-		// Envia o valor pra direita somente, pois é o sentido do display.
 	}
   /* USER CODE END periodic_task */
 }
@@ -249,25 +249,20 @@ void button_task(void *argument)
   /* USER CODE BEGIN button_task */
 	Telegram tmpTelegram = {0};
 
+	float temperature = 0;
+
 	while(1) {
 		//Espera até o botão ser apertado
-
-
-		// Lê o adc
-
-		// TODO KELVIN
-
-		// Preenche o telegrama
-		Erro erro = criarStruct(&tmpTelegram, 4, 0); // TODO KELVIN
-		if (erro == ERRO_OK) {
-			Uart_startTx(&uartRight, &tmpTelegram);
-		};
-//		tmpTelegram.id = 4;
-//		tmpTelegram.data.temperature = 0;	// TODO KELVIN
-//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
-
-		// Envia o valor pra direita somente, pois é o sentido do display.
+		if (Button_Wait()) {
+			// Lê o adc
+			Sensor_Read(&temperature);
+			// Preenche o telegrama
+			Erro erro = criarStruct(&tmpTelegram, 4, temperature); // TODO KELVIN
+			if (erro == ERRO_OK) {
+				// Envia o valor pra direita somente, pois é o sentido do display.
+				Uart_startTx(&uartRight, &tmpTelegram);
+			};
+    }
 	}
   /* USER CODE END button_task */
 }
@@ -284,10 +279,10 @@ void button_task(void *argument)
 void asynchronousR_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousR_task */
-	Telegram tmpTelegram = {0};
+	float temperature = 0;
 
-	Uart_init(&uartRight);
-
+ 	Telegram tmpTelegram = {0};
+  
 	while(1) {
 		//Espera até receber um telegrama válido na uart
 		Uart_waitEvent(&uartRight, UartEvent_rxComplete, portMAX_DELAY);
@@ -295,7 +290,7 @@ void asynchronousR_task(void *argument)
 		// Assim que o evento for recebido, verifica se é um broadcast
 		// (tem que ser broadcast, se não alguém está fazendo coisa errada, mas é bom verificar)
 
-		if (uartLeft.rxBuffer.id != 255) {
+		if (uartRight.rxBuffer.id != Requisition) {
 			// Alguém fez algo errado, apenas ignora a mensagem
 			continue;
 		}
@@ -305,23 +300,20 @@ void asynchronousR_task(void *argument)
 		// 2º Rapassa a requisição para os dispositivos à esquerda
 
 		// Lê o adc
-
-		// TODO KELVIN
-
-		// Preenche o telegrama
-
-		Erro erro = criarStruct(&tmpTelegram, 4, 0);
+		Sensor_Read(&temperature);
+		
+    // Preenche o telegrama
+    Erro erro = criarStruct(&tmpTelegram, 4, temperature); // TODO KELVIN
 		if (erro == ERRO_OK) {
+      // Envia o valor pra direita somente, pois é o sentido do display.
 			Uart_startTx(&uartRight, &tmpTelegram);
-			//		tmpTelegram.data.dontCare1 = 0;	// Não precisa perder tempo com esse
-			//		tmpTelegram.data.dontCare2 = 0; // Nem com esse
-
-			// Devolve o valor conforme requisição
-			// Repassa o telegram para a esquerda
-			tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
-			Uart_startTx(&uartLeft, &tmpTelegram);
 		};
 
+		vTaskDelay(1);
+
+		// Repassa o telegram para a esquerda
+		tmpTelegram.id = 255;	// Só precisa atualizar o id, o resto é dont care
+		Uart_startTx(&uartLeft, &tmpTelegram);
 	}
   /* USER CODE END asynchronousR_task */
 }
@@ -340,7 +332,6 @@ void asynchronousR_task(void *argument)
 void asynchronousL_task(void *argument)
 {
   /* USER CODE BEGIN asynchronousL_task */
-	Uart_init(&uartLeft);
 
 	while(1) {
 		//Espera até receber um telegrama válido na uart
