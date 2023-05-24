@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "Uart.h"
 #include "Sensor.h"
+#include "Button.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
